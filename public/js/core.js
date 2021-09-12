@@ -182,6 +182,7 @@ $.load = function (file, start, end) {
 $.wait = function (callback, ms) {
   return window.setTimeout(callback, ms);
 }
+
 $.play = function (instrument, key, state) {
   var instrumentName = Object.keys(InstrumentEnum).find(k => InstrumentEnum[k] === instrument).toLowerCase();
   var commonKey = KeyEnum[key];
@@ -196,8 +197,28 @@ $.play = function (instrument, key, state) {
         $(this).css("visibility", ($(this).attr("id") === instrumentName) ? "visible" : "hidden");
       });
     }
-    //lowLag.play(instrumentName + commonKey);
+    lowLag.play(instrumentName + commonKey);
     //$.layers(Object.keys(LayersPerInstrumentEnum).find(k => LayersPerInstrumentEnum[k] == instrument), true);
+  } else {
+    pressed.remove(commonKey);
+  }
+  $(id).css("background-position-x", (state ? "-800px" : "0"));
+}
+
+$.playVisual = function (instrument, key, state) {
+  var instrumentName = Object.keys(InstrumentEnum).find(k => InstrumentEnum[k] === instrument).toLowerCase();
+  var commonKey = KeyEnum[key];
+  var id = "#" + (instrument == InstrumentEnum.MEOW ? "mouth" : "paw-" + ((instrument == InstrumentEnum.BONGO ? commonKey : commonKey <= 5 && commonKey != 0 ? 0 : 1) == 0 ? "left" : "right"));
+  if (state == true) {
+    if (jQuery.inArray(commonKey, pressed) !== -1) {
+      return;
+    }
+    pressed.push(commonKey);
+    if (instrument != InstrumentEnum.MEOW) {
+      $(".instruments>div").each(function (index) {
+        $(this).css("visibility", ($(this).attr("id") === instrumentName) ? "visible" : "hidden");
+      });
+    }
   } else {
     pressed.remove(commonKey);
   }
@@ -211,9 +232,9 @@ $.playSequence = function (sequence) {
     setTimeout(() => {
       var instrument = InstrumentPerKeyEnum[element.toUpperCase()];
       var key = KeyEnum[element.toUpperCase()];
-      $.play(instrument, key, true);
+      $.playVisual(instrument, key, true);
       setTimeout(() => {
-        $.play(instrument, key, false);
+        $.playVisual(instrument, key, false);
       }, 150);
     }, i * 300);
   }
